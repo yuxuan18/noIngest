@@ -1,0 +1,5 @@
+{"rate": 0.1, "cost": 4816, "avg": 548.3333333333334, "avg_lb": -1, "avg_ub": -1, "count": 170.0, "count_lb": -10.0, "count_ub": -10.0}
+{"rate": 0.15, "cost": 7229, "avg": 575.16, "avg_lb": -1, "avg_ub": -1, "count": 320.0, "count_lb": -6.666666666666667, "count_ub": -6.666666666666667}
+{"rate": 0.2, "cost": 9655, "avg": 594.2935779816514, "avg_lb": -1, "avg_ub": -1, "count": 305.0, "count_lb": -5.0, "count_ub": -5.0}
+{"rate": 0.25, "cost": 12078, "avg": 569.922077922078, "avg_lb": -1, "avg_ub": -1, "count": 348.0, "count_lb": -4.0, "count_ub": -4.0}
+{"rate": 0.3, "cost": 14492, "avg": 586.5501618122977, "avg_lb": -1, "avg_ub": -1, "count": 400.0, "count_lb": -3.3333333333333335, "count_ub": -3.3333333333333335}

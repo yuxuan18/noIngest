@@ -29,6 +29,9 @@ class Data:
     
     def get_num_detects(self):
         return {part: len(self.detects[part]) for part in self.detects}
+    
+    def get_num_frames(self):
+        return {part: len(self.detects[part]["frame_id"].unique()) for part in self.detects}
 
     def get_gt_avg(self):
         # self join
@@ -46,6 +49,17 @@ class Data:
 
     def get_count(self, matched_tuples: np.ndarray):
         return np.unique(matched_tuples.T[0]).shape[0]
+    
+    def get_count_w_ci(self, matched_tuples: np.ndarray):
+        ids = matched_tuples.T[0]
+        estimate = np.unique(ids).shape[0]
+        resample_results = []
+        for _ in range(5000):
+            resample = np.random.choice(ids, size=len(ids), replace=True)
+            resample_results.append(np.unique(resample).shape[0])
+        lb = np.quantile(resample_results, 0.025)
+        ub = np.quantile(resample_results, 0.975)
+        return estimate, lb, ub
 
     def get_avg(self, matched_tuples: np.ndarray):
         columns = [f"detect_id_T{i}" for i in range(len(matched_tuples[0]))]
@@ -56,6 +70,24 @@ class Data:
         matched_tuples_df = matched_tuples_df.merge(table1, how="inner", left_on="detect_id_T0", right_on="detect_id")
         matched_tuples_df = matched_tuples_df.merge(table2, how="inner", left_on="detect_id_T1", right_on="detect_id")
         return np.abs(matched_tuples_df["frame_id_x"] - matched_tuples_df["frame_id_y"]).mean()
+    
+    def get_avg_w_ci(self, matched_tuples: np.ndarray):
+        columns = [f"detect_id_T{i}" for i in range(len(matched_tuples[0]))]
+        matched_tuples_df = pd.DataFrame(matched_tuples, columns=columns)
+        part1, part2 = self.partition[:2]
+        table1 = self.detects[part1]
+        table2 = self.detects[part2]
+        matched_tuples_df = matched_tuples_df.merge(table1, how="inner", left_on="detect_id_T0", right_on="detect_id")
+        matched_tuples_df = matched_tuples_df.merge(table2, how="inner", left_on="detect_id_T1", right_on="detect_id")
+        avg_col = np.abs(matched_tuples_df["frame_id_x"] - matched_tuples_df["frame_id_y"])
+        estimate = np.mean(avg_col)
+        resample_results = []
+        for _ in range(5000):
+            resample = np.random.choice(avg_col, size=len(avg_col), replace=True)
+            resample_results.append(np.mean(resample))
+        lb = np.quantile(resample_results, 0.025)
+        ub = np.quantile(resample_results, 0.975)
+        return estimate, lb, ub
     
     def get_predicate(self, detect_id_package: List[List[int]]) -> np.ndarray:
         assert len(self.partition) == len(detect_id_package)
@@ -85,6 +117,7 @@ class Data:
         return positive_tuples_array[id_keep]
         
     def _get_all_feature_predicate(self, threshold) -> pd.DataFrame:
+        self.prep_features()
         all_features = [self.features[part] for part in self.partition]
         curr_results = self._sim_join(threshold, all_features)
         return curr_results

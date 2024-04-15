@@ -1,4 +1,4 @@
-pickle
 numpy
 pandas
 gdown
+matplotlib
